@@ -43,4 +43,17 @@ $(document).ready(function () {
         }
         console.log(msg["height"]);
     });
+
+    // Submit if user presses enter when in text inputs.
+    document.querySelectorAll("input.location_input").forEach(item => {
+        item.addEventListener("keyup", event => {
+            if (event.key === "Enter") {
+                // Cancel the default action, if needed
+                event.preventDefault();
+                // Trigger the submit button with a click
+                document.getElementById("submit_button").click();
+            }
+        });
+    });
+
 });
