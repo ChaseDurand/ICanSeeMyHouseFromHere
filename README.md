@@ -1,8 +1,11 @@
-# ICanSeeMyHouseFromHere
+# ICanSeeMyHouseFromHere!
 
 A completely practical utility for calculating and visualizing the height required to achieve line of sight between two locations.
 
-Assumptions:
- * You and your house are on Earth, which is a perfect sphere.
+## ~~Limitations~~ Use Cases
+ * You and your house are on perfectly spherical and terrain-free Earth.
  * Your infinite-vision eyeballs are 1.6m above your feet.
- * Your house is infinitely small.
+ * Your house is a single small point that is conveniently still observable.
+
+## Acknowledgements
+ThreeJS globe class from [vasturiano's three-globe](https://github.com/vasturiano/three-globe).
