@@ -13,13 +13,13 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
-def coorToAngle(lat1, long1, lat2, long2):
-    # Convert lat/long to vector
-    p1 = numpy.array([math.cos(math.radians(lat1)) * math.cos(math.radians(long1)),
-            math.cos(math.radians(lat1)) * math.sin(math.radians(long1)),
+def coorToAngle(lat1, lng1, lat2, lng2):
+    # Convert lat/lng to vector
+    p1 = numpy.array([math.cos(math.radians(lat1)) * math.cos(math.radians(lng1)),
+            math.cos(math.radians(lat1)) * math.sin(math.radians(lng1)),
             math.sin(math.radians(lat1))])
-    p2 = numpy.array([math.cos(math.radians(lat2)) * math.cos(math.radians(long2)),
-            math.cos(math.radians(lat2)) * math.sin(math.radians(long2)),
+    p2 = numpy.array([math.cos(math.radians(lat2)) * math.cos(math.radians(lng2)),
+            math.cos(math.radians(lat2)) * math.sin(math.radians(lng2)),
             math.sin(math.radians(lat2))])
     # Dot product divided by magnitudes multiplied
     numerator = numpy.dot(p1, p2)
@@ -53,41 +53,41 @@ def index():
 
 @socketio.event
 def submit_event(message):
-    loc1 = message['house']
-    loc2 = message['here']
+    houseText = message['house']
+    hereText = message['here']
 
     geolocator = Nominatim(user_agent='ICanSeeMyHouseFromHere')
     
-    loc = geolocator.geocode(loc1)
-    if loc == None:
-        print("Location 1 is not valid!")
+    houseGeo = geolocator.geocode(houseText)
+    if houseGeo == None:
+        print("House location is not valid!")
         return
-    print(loc.latitude, loc.longitude)
-    lat1 = loc.latitude
-    long1 = loc.longitude
+    print(houseGeo.latitude, houseGeo.longitude)
+    houseLat = houseGeo.latitude
+    houseLng = houseGeo.longitude
 
-    loc = geolocator.geocode(loc2)
-    if loc == None:
-        print("Location 2 is not valid!")
+    hereGeo = geolocator.geocode(hereText)
+    if hereGeo == None:
+        print("Here location is not valid!")
         return
-    print(loc.latitude, loc.longitude)
-    lat2 = loc.latitude
-    long2 = loc.longitude
+    print(hereGeo.latitude, hereGeo.longitude)
+    hereLat = hereGeo.latitude
+    hereLng = hereGeo.longitude
 
-    angle = coorToAngle(lat1, long1, lat2, long2)
+    angle = coorToAngle(houseLat, houseLng, hereLat, hereLng)
     print("Angle: ", angle)
 
+    height = "ERROR"
     if angle < 90:
         height = angleToHeight(angle)
-        print(height)
-        emit('submit_response', {
-            "height": height
-        })
-    else:
-        print("No valid height!")    
-        emit('submit_response', {
-            "height": "ERROR"
-        })    
+    print(height)
+    emit('submit_response', {
+        "height": height,
+        "houseLat" : houseLat,
+        "houseLng" : houseLng,
+        "hereLat" : hereLat,
+        "hereLng" : hereLng
+    })
     return
 
 if __name__ == '__main__':

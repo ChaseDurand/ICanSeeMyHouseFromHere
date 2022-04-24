@@ -37,11 +37,20 @@ $(document).ready(function () {
         result = msg["height"];
         if(result == "ERROR") {
             document.getElementById('result').innerHTML = msg["height"];
+            gData[0].size = 0;
         }
         else {
             document.getElementById('result').innerHTML = msg["height"] + "m";
+            const N = 1;
+            gData[0].lat = msg["hereLat"];
+            gData[0].lng = msg["hereLng"];
+            rEarth = 6371000 // Radius of the Earth in meters
+            gData[0].size = msg["height"] / rEarth;
         }
+        
         console.log(msg["height"]);
+        Globe.pointsData(gData);
+        console.log(gData);
     });
 
     // Submit if user presses enter when in text inputs.
