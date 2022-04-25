@@ -1,10 +1,10 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from flask_socketio import SocketIO, emit
 from threading import Lock
 import uuid
 from geopy.geocoders import Nominatim
 import math
-import numpy
+import numpy as np
 
 async_mode = None
 app = Flask(__name__)
@@ -13,23 +13,26 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
-def coorToAngle(lat1, lng1, lat2, lng2):
-    # Convert lat/lng to vector
-    p1 = numpy.array([math.cos(math.radians(lat1)) * math.cos(math.radians(lng1)),
-            math.cos(math.radians(lat1)) * math.sin(math.radians(lng1)),
-            math.sin(math.radians(lat1))])
-    p2 = numpy.array([math.cos(math.radians(lat2)) * math.cos(math.radians(lng2)),
-            math.cos(math.radians(lat2)) * math.sin(math.radians(lng2)),
-            math.sin(math.radians(lat2))])
+# Given lat/long coordinates, return 3d vector.
+# Return vector as numpy.array.
+def coorToVec(lat, lng):
+    return np.array([math.cos(math.radians(lat)) * math.cos(math.radians(lng)),
+        math.cos(math.radians(lat)) * math.sin(math.radians(lng)),
+        math.sin(math.radians(lat))])
+
+# Given two vectors, return the angle between them.
+# Take vectors as numpy.array.
+# Return angle in degrees.
+def vecToAngle(v1, v2):
     # Dot product divided by magnitudes multiplied
-    numerator = numpy.dot(p1, p2)
-    denominator = numpy.linalg.norm(p1) * numpy.linalg.norm(p2)
+    numerator = np.dot(v1, v2)
+    denominator = np.linalg.norm(v1) * np.linalg.norm(v2)
     angle = math.acos(numerator / denominator)
     return math.degrees(angle)
 
 def angleToHeight(angle):
     rEarth = 6371000 # Radius of the Earth in meters
-    observerHeight = 1.7 # Height of observer
+    observerHeight = 1.6 # Height of observer
 
     hypotenuse = rEarth / (math.cos(math.radians(angle)))
     height = hypotenuse - rEarth
@@ -44,13 +47,35 @@ def angleToHeight(angle):
         height = round(height, 1)
     else:
         height = round(height, 0)
-
     return height
+
+def emitError(errorMsg):
+    emit('submit_response', {
+        "statusMsg": errorMsg,
+        "height": 0,
+        "houseLat" : 0,
+        "houseLng" : 0,
+        "hereLat" : 0,
+        "hereLng" : 0,
+        "houseX" : 0,
+        "houseY" : 0,
+        "houseZ" : 0,
+        "hereX" : 0,
+        "hereY" : 0,
+        "hereZ" : 0
+    })
+    return
 
 @app.route('/')
 def index():
     return render_template('index.html', async_mode=socketio.async_mode)
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return redirect('/')
+
+# Called when the user hits submit
 @socketio.event
 def submit_event(message):
     houseText = message['house']
@@ -60,7 +85,7 @@ def submit_event(message):
     
     houseGeo = geolocator.geocode(houseText)
     if houseGeo == None:
-        print("House location is not valid!")
+        emitError("House location is not valid!")
         return
     print(houseGeo.latitude, houseGeo.longitude)
     houseLat = houseGeo.latitude
@@ -68,26 +93,38 @@ def submit_event(message):
 
     hereGeo = geolocator.geocode(hereText)
     if hereGeo == None:
-        print("Here location is not valid!")
+        emitError("Here location is not valid!")
         return
     print(hereGeo.latitude, hereGeo.longitude)
     hereLat = hereGeo.latitude
     hereLng = hereGeo.longitude
 
-    angle = coorToAngle(houseLat, houseLng, hereLat, hereLng)
+    houseVec = coorToVec(houseLat, houseLng)
+    hereVec = coorToVec(hereLat, hereLng)
+    
+
+    angle = vecToAngle(houseVec, hereVec)
     print("Angle: ", angle)
 
-    height = "ERROR"
     if angle < 90:
         height = angleToHeight(angle)
-    print(height)
-    emit('submit_response', {
-        "height": height,
-        "houseLat" : houseLat,
-        "houseLng" : houseLng,
-        "hereLat" : hereLat,
-        "hereLng" : hereLng
+        print(height)
+        emit('submit_response', {
+            "statusMsg": "OK",
+            "height": height,
+            "houseLat" : houseLat,
+            "houseLng" : houseLng,
+            "hereLat" : hereLat,
+            "hereLng" : hereLng,
+            "houseX" : houseVec[0],
+            "houseY" : houseVec[1],
+            "houseZ" : houseVec[2],
+            "hereX" : hereVec[0],
+            "hereY" : hereVec[1],
+            "hereZ" : hereVec[2]
     })
+    else:
+        emitError("Not possible (angle > 90 degrees).")
     return
 
 if __name__ == '__main__':
