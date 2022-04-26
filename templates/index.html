@@ -2,13 +2,11 @@
 <html>
 
 <head>
-    <title>I Can See My House From Here</title>
-    <link rel="icon" type="image/x-icon" href="../static/favicon.ico"/>
-    <link rel="stylesheet" type="text/css" href="../static/style.css"/>
-
+    <title>I Can See My House From Here!</title>
+    <link rel="icon" type="image/x-icon" href="../static/images/favicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src='../static/index.js'></script>
-
+    <script src='../static/js/index.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
         var socket = io();
@@ -16,29 +14,27 @@
             socket.emit('my event', {data: 'I\'m connected!'});
         });
     </script>
-
-    <!-- TODO move this offline instead of CDN -->
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/three/examples/js/controls/TrackballControls.js"></script>
-    <script src="//unpkg.com/three/examples/js/controls/OrbitControls.js"></script>
-    <script src="//unpkg.com/three-globe"></script>
+    <script src="//unpkg.com/three@0.139.2"></script>
+    <script src="//unpkg.com/three@0.139.2/examples/js/controls/TrackballControls.js"></script>
+    <script src="//unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="//unpkg.com/three-globe@2.24.4"></script>
 </head>
 
 <body>
-    <h1>
+    <!-- <h1>
         I Can See My House From Here!
-    </h1>
+    </h1> -->
 
-    <label for="house">House:</label><br>
-    <input class="location_input" autocomplete="off" type="text" id="house" name="house" value=""><br>
-    <label for="here">Here:</label><br>
+    <!-- <label for="house">House:</label><br> -->
+    <input class="location_input" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
+    <!-- <label for="here">Here:</label><br> -->
     <input class="location_input" autocomplete="off" type="text" id="here" name="here" value=""><br><br>
     <button class="submit" id="submit_button">Submit</button>
 
     <h2 id="result"></h2>
 
-    <div id="globeViz"></div>
-
+    
+    <canvas id="globeCanvas"></canvas>
 </body>
 
 </html>

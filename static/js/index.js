@@ -31,6 +31,8 @@ $(document).ready(function () {
 
     // Handler for results from backend
     socket.on('submit_response', function (msg) {
+
+
         // If LOS line exists, remove it
         if (scene.children[scene.children.length - 1].type == "LineSegments") {
             scene.remove(scene.children[scene.children.length - 1]);
@@ -44,31 +46,33 @@ $(document).ready(function () {
         else {
             
             // Success from backend
+            // Update on screen text
             document.getElementById('result').innerHTML = msg["height"] + "m";
+            // Update here and house points
             gData[0].lat = msg["hereLat"];
             gData[0].lng = msg["hereLng"];
+            gData[0].color = "red";
             rEarth = 6371000 // Radius of the Earth in meters
             gData[0].size = msg["height"] / rEarth;
             gData[1].lat = msg["houseLat"];
             gData[1].lng = msg["houseLng"];
             gData[1].size = 0;
-            gData[1].color = 'yellow';
+            gData[1].color = "yellow";
 
             // radiusRatio = 2;
             // radiusMin = 1;
             // radiusMax = 30;
             // radiusTmp = Math.max(radiusRatio * msg["height"], radiusMin);
             // gData[0].pointRadius = Math.min(radiusTmp, radiusMax);
-            console.log(gData[0]);
-            console.log(Globe);
+            // console.log(gData[0]);
+            // console.log(Globe);
             // Globe.pointRadius = 0.1;
             Globe.pointsData(gData);
 
-            // Create LOS line
+            // Create dashed LOS line
             rEarthLine = 100;
             observerHeight = 1.7 / 6371000;
             offset = 1.001;
-
             let startVector = new THREE.Vector3(
                 msg["houseY"] * rEarthLine * offset,
                 msg["houseZ"] * rEarthLine * offset,
@@ -79,16 +83,22 @@ $(document).ready(function () {
                 msg["hereZ"] * (1+observerHeight+gData[0].size) * rEarthLine * offset,
                 msg["hereX"] * (1+observerHeight+gData[0].size) * rEarthLine * offset
             );
-
             let linePoints = [];
             linePoints.push(startVector, endVector);
-
             var lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-
             let line = new THREE.LineSegments(lineGeo, lineMaterial);
             line.computeLineDistances();
-
             scene.add(line);
+
+            // Adjust camera to frame locations, roughly scaling by tower height.
+            cameraZoom = Math.min(400 + gData[0].size * 300, 1700);
+            verticalOffset = 0.5; // Bias view towards equator to view tower at angle.
+            camera.position.x = (msg["houseY"]+msg["hereY"]) * 0.5 * cameraZoom;
+            camera.position.y = (msg["houseZ"]+msg["hereZ"]) * 0.5 * cameraZoom
+                * verticalOffset;
+            camera.position.z = (msg["houseX"]+msg["hereX"]) * 0.5 * cameraZoom;
+            
+            orbControls.autoRotate = false;
         }
     });
 
@@ -114,52 +124,6 @@ $(document).ready(function () {
       size: 0,
       color: 'red'
     }));
-
-    Globe = new ThreeGlobe()
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .pointAltitude('size')
-      .pointRadius(0.7)
-      .pointColor('color')
-      .pointsTransitionDuration(0)
-
-    // custom globe material
-    const globeMaterial = Globe.globeMaterial();
-    globeMaterial.bumpScale = 10;
-    new THREE.TextureLoader().load('//unpkg.com/three-globe/example/img/earth-water.png', texture => {
-      globeMaterial.specularMap = texture;
-      globeMaterial.specular = new THREE.Color('grey');
-      globeMaterial.shininess = 15;
-    });
-
-    // Setup renderer
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('globeViz').appendChild(renderer.domElement);
-
-    // Setup scene
-    const scene = new THREE.Scene();
-    scene.add(Globe);
-    scene.add(new THREE.AmbientLight(0xbbbbbb));
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.65));
-
-    // Setup camera
-    const camera = new THREE.PerspectiveCamera();
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    camera.position.z = 500;
-
-    // Add camera controls
-    const orbControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbControls.minDistance = 101;
-    orbControls.maxDistance = 2000;
-    orbControls.rotateSpeed = 2;
-    orbControls.zoomSpeed = 0.7;
-    orbControls.autoRotate = true;
-    orbControls.autoRotateSpeed = 0.5;
-    orbControls.enableDamping = true;
-    orbControls.dampingFactor = 0.5;
-    orbControls.enablePan = false;
 
     var lineVertShader = `
         attribute float lineDistance;
@@ -212,19 +176,79 @@ $(document).ready(function () {
     lineMaterial.linewidth = 40;
 
     var clock = new THREE.Clock();
-    var time = 0;
+    var timeLine = 0;
 
-    // Kick-off renderer
-    (function animate() {
-        // Frame cycle
+    Globe = new ThreeGlobe()
+        .globeImageUrl('//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg')
+        .bumpImageUrl('//unpkg.com/three-globe@2.24.4/example/img/earth-topology.png')
+        .pointAltitude('size')
+        .pointRadius(0.7)
+        .pointColor('color')
+        .pointsTransitionDuration(0)
+
+    // custom globe material
+    const globeMaterial = Globe.globeMaterial();
+    globeMaterial.bumpScale = 10;
+    new THREE.TextureLoader().load('//unpkg.com/three-globe@2.24.4/example/img/earth-water.png', texture => {
+        globeMaterial.specularMap = texture;
+        globeMaterial.specular = new THREE.Color('grey');
+        globeMaterial.shininess = 15;
+    });
+    
+    const  renderer = new THREE.WebGLRenderer({canvas: document.querySelector("canvas")});
+    
+    // There's no reason to set the aspect here because we're going
+    // to set it every frame anyway so we'll set it to 2 since 2
+    // is the the aspect for the canvas default size (300w/150h = 2)
+    const  camera = new THREE.PerspectiveCamera(70, 2, 1, 10000);
+    camera.position.z = 400;
+    
+    const scene = new THREE.Scene();
+
+    scene.add(new THREE.AmbientLight(0xffeeee, 1.15));
+
+    const light1 = new THREE.PointLight(0xffdddd, .2, 0);
+    light1.position.set(300, 300, 300);
+    scene.add(light1);
+
+    scene.add(Globe);
+    
+    // Add camera controls
+    const orbControls = new THREE.OrbitControls(camera, renderer.domElement);
+    orbControls.minDistance = 101;
+    orbControls.maxDistance = 2000;
+    orbControls.rotateSpeed = 2;
+    orbControls.zoomSpeed = 0.7;
+    orbControls.autoRotate = true;
+    orbControls.autoRotateSpeed = 0.5;
+    orbControls.enableDamping = true;
+    orbControls.dampingFactor = 0.5;
+    orbControls.enablePan = false;
+    
+    function resizeCanvasToDisplaySize() {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (canvas.width !== width ||canvas.height !== height) {
+            // you must pass false here or three.js sadly fights the browser
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+    
+            // set render target sizes here
+        }
+    }
+    
+    function animate(time) {
+        time *= 0.001;  // seconds
         orbControls.update();
+        resizeCanvasToDisplaySize();
+        
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
-        time += clock.getDelta();
-        lineMaterial.uniforms.time.value = time;
-    })();
-
-
+        timeLine += clock.getDelta();
+        lineMaterial.uniforms.time.value = 4 * timeLine;
+    }
     
-
+    requestAnimationFrame(animate);
 });
