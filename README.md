@@ -9,3 +9,5 @@ A completely practical utility for calculating and visualizing the height requir
 
 ## Acknowledgements
 ThreeJS globe class from [vasturiano's three-globe](https://github.com/vasturiano/three-globe).
+
+Public domain globe icon from [dannya](https://openclipart.org/detail/199629/primary-globe).

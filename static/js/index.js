@@ -114,6 +114,12 @@ $(document).ready(function () {
         });
     });
 
+    var canvas_dom = document.querySelector("canvas")// make this your canvas DOM element
+    canvas_dom.addEventListener("touchstart",  function(event) {event.preventDefault()})
+    canvas_dom.addEventListener("touchmove",   function(event) {event.preventDefault()})
+    canvas_dom.addEventListener("touchend",    function(event) {event.preventDefault()})
+    canvas_dom.addEventListener("touchcancel", function(event) {event.preventDefault()})
+
     //-----------
     // Globe
     //-----------
