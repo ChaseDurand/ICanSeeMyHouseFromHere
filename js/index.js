@@ -92,27 +92,30 @@ $(document).ready(function () {
         // Determine if angle is < 90
         angle = vecToAngle(houseVec, hereVec);
 
+        // If LOS line exists, remove it
+        if (scene.children[scene.children.length - 1].type == "LineSegments") {
+            scene.remove(scene.children[scene.children.length - 1]);
+        }
+
+        // Update here and house points
+        gData[0].lat = hereCoor[0];
+        gData[0].lng = hereCoor[1];
+        gData[0].color = "red";
+        gData[0].size = 0;
+        gData[1].lat = houseCoor[0];
+        gData[1].lng = houseCoor[1];
+        gData[1].size = 0;
+        gData[1].color = "yellow";
+
         if(angle < (Math.PI / 2)) {
             // Angle to height
             height = angleToHeight(angle);
 
-            // If LOS line exists, remove it
-            if (scene.children[scene.children.length - 1].type == "LineSegments") {
-                scene.remove(scene.children[scene.children.length - 1]);
-            }
+            // Set tower height
+            gData[0].size = height / rEarth;
 
             // Update on screen text
             document.getElementById("result").innerHTML = height + "m";
-
-            // Update here and house points
-            gData[0].lat = hereCoor[0];
-            gData[0].lng = hereCoor[1];
-            gData[0].color = "red";
-            gData[0].size = height / rEarth;
-            gData[1].lat = houseCoor[0];
-            gData[1].lng = houseCoor[1];
-            gData[1].size = 0;
-            gData[1].color = "yellow";
 
             // Create dashed LOS line
             rEarthLine = 100;
