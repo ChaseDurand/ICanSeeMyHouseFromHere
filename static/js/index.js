@@ -1,87 +1,132 @@
 $(document).ready(function () {
-    // Connect to the Socket.IO server.
-    // The connection URL has the following format, relative to the current page:
-    //     http[s]://<domain>:<port>[/<namespace>]
-    var socket = io();
+    rEarth = 6371000 // Radius of the Earth in meters
 
-    // Event handler for new connections.
-    // The callback function is invoked when a connection with the
-    // server is established.
-    socket.on('connect', function () {
-        socket.emit('my_event', { data: 'I\'m connected!' });
-    });
+    function displayError(err) {
+        document.getElementById("result").innerHTML = err;
+    }
 
-    // Event handler for server sent data.
-    // The callback function is invoked whenever the server emits data
-    // to the client. The data is then displayed in the 'Received'
-    // section of the page.
-    socket.on('my_response', function (msg, cb) {
-        $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
-        if (cb)
-            cb();
-    });
+    async function getLocation(loc) {
+        apiURL = "https://nominatim.openstreetmap.org/search?q=";
+        suffix = "&limit=1&format=jsonv2"
+        try {
+            res = await fetch(apiURL+loc+suffix, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+            resultJSON = await res.json();
+            return [resultJSON["0"]["lat"], resultJSON["0"]["lon"]];
+        } catch(err) {
+            displayError("Error getting location: " + loc);
+            console.log(err);
+            return [0, 0];
+        }
+    }
+
+    // Convert degrees to radians
+    function toRadians(angle) {
+        return angle * (Math.PI/180);
+    }
+
+    // Return the dot product of two arrays
+    function dotProduct(a,b){
+        const result = a.reduce((acc, cur, index)=>{
+            acc += (cur * b[index]);
+            return acc;
+        }, 0);
+        return result;
+    }
+
+    // Calculate magnitude of array
+    function mag(a) {
+        sum = 0
+        for (i in a) {
+            sum += (i*i);
+        }
+        return Math.sqrt(sum);
+    }
+
+    // Convert lat, long to x, y, z vector
+    function coorToVec(coors) {
+        lat = coors[0];
+        lng = coors[1];
+        return [Math.cos(toRadians(lat)) * Math.cos(toRadians(lng)),
+            Math.cos(toRadians(lat)) * Math.sin(toRadians(lng)),
+            Math.sin(toRadians(lat))]
+    }
+    
+
+    // Given two vectors, return the angle between them.
+    // Return angle in radians.
+    function vecToAngle(v1, v2){
+        // acos of dot product divided by magnitudes multiplied
+        // Mags are both 1
+        return Math.acos(dotProduct(v1, v2));
+    }
+
+
+    // Given an angle in radians, return height of tower.
+    function angleToHeight(angle) {
+        observerHeight = 1.6 // Height of observer
+        hypotenuse = rEarth / Math.cos(angle);
+        height = hypotenuse - rEarth;
+        height -= observerHeight;
+        // Clip lower bound at 0m
+        return Math.max(height, 0);
+    }
 
     // Handler for submit button
     // Send inputs to backend
-    $('.submit').click(function () {
-       house = document.getElementById('house').value;
-       here = document.getElementById('here').value;
-       socket.emit('submit_event', { 'house': house, 'here': here});
-    });
+    $(".submit").click(async function () {
+        house = document.getElementById("house").value;
+        here = document.getElementById("here").value;
 
-    // Handler for results from backend
-    socket.on('submit_response', function (msg) {
+        houseCoor = await getLocation(house)
+        hereCoor = await getLocation(here)
 
+        // Coordinates to vector
+        houseVec = coorToVec(houseCoor);
+        hereVec = coorToVec(hereCoor);
 
-        // If LOS line exists, remove it
-        if (scene.children[scene.children.length - 1].type == "LineSegments") {
-            scene.remove(scene.children[scene.children.length - 1]);
-        }
+        // Determine if angle is < 90
+        angle = vecToAngle(houseVec, hereVec);
 
-        if(msg["statusMsg"] != "OK") {
-            // Error from backend
-            document.getElementById('result').innerHTML = msg["statusMsg"];
-            Globe.pointsData(Array());
-        }
-        else {
-            
-            // Success from backend
+        if(angle < (Math.PI / 2)) {
+            // Angle to height
+            height = angleToHeight(angle);
+
+            // If LOS line exists, remove it
+            if (scene.children[scene.children.length - 1].type == "LineSegments") {
+                scene.remove(scene.children[scene.children.length - 1]);
+            }
+
             // Update on screen text
-            document.getElementById('result').innerHTML = msg["height"] + "m";
+            document.getElementById("result").innerHTML = height + "m";
+
             // Update here and house points
-            gData[0].lat = msg["hereLat"];
-            gData[0].lng = msg["hereLng"];
+            gData[0].lat = hereCoor[0];
+            gData[0].lng = hereCoor[1];
             gData[0].color = "red";
-            rEarth = 6371000 // Radius of the Earth in meters
-            gData[0].size = msg["height"] / rEarth;
-            gData[1].lat = msg["houseLat"];
-            gData[1].lng = msg["houseLng"];
+            gData[0].size = height / rEarth;
+            gData[1].lat = houseCoor[0];
+            gData[1].lng = houseCoor[1];
             gData[1].size = 0;
             gData[1].color = "yellow";
 
-            // radiusRatio = 2;
-            // radiusMin = 1;
-            // radiusMax = 30;
-            // radiusTmp = Math.max(radiusRatio * msg["height"], radiusMin);
-            // gData[0].pointRadius = Math.min(radiusTmp, radiusMax);
-            // console.log(gData[0]);
-            // console.log(Globe);
-            // Globe.pointRadius = 0.1;
-            Globe.pointsData(gData);
-
             // Create dashed LOS line
             rEarthLine = 100;
-            observerHeight = 1.7 / 6371000;
+            observerHeightLine = observerHeight / rEarth;
             offset = 1.001;
             let startVector = new THREE.Vector3(
-                msg["houseY"] * rEarthLine * offset,
-                msg["houseZ"] * rEarthLine * offset,
-                msg["houseX"] * rEarthLine * offset
+                houseVec[1] * rEarthLine * offset,
+                houseVec[2] * rEarthLine * offset,
+                houseVec[0] * rEarthLine * offset
             );
             let endVector = new THREE.Vector3(
-                msg["hereY"] * (1+observerHeight+gData[0].size) * rEarthLine * offset,
-                msg["hereZ"] * (1+observerHeight+gData[0].size) * rEarthLine * offset,
-                msg["hereX"] * (1+observerHeight+gData[0].size) * rEarthLine * offset
+                hereVec[1] * (1+observerHeightLine+gData[0].size) * rEarthLine * offset,
+                hereVec[2] * (1+observerHeightLine+gData[0].size) * rEarthLine * offset,
+                hereVec[0] * (1+observerHeightLine+gData[0].size) * rEarthLine * offset
             );
             let linePoints = [];
             linePoints.push(startVector, endVector);
@@ -91,15 +136,20 @@ $(document).ready(function () {
             scene.add(line);
 
             // Adjust camera to frame locations, roughly scaling by tower height.
-            cameraZoom = Math.min(400 + gData[0].size * 300, 1700);
+            cameraZoom = Math.min(300 + gData[0].size * 300, 1700);
             verticalOffset = 0.5; // Bias view towards equator to view tower at angle.
-            camera.position.x = (msg["houseY"]+msg["hereY"]) * 0.5 * cameraZoom;
-            camera.position.y = (msg["houseZ"]+msg["hereZ"]) * 0.5 * cameraZoom
+            camera.position.x = (houseVec[1]+hereVec[1]) * 0.5 * cameraZoom;
+            camera.position.y = (houseVec[2]+hereVec[2]) * 0.5 * cameraZoom
                 * verticalOffset;
-            camera.position.z = (msg["houseX"]+msg["hereX"]) * 0.5 * cameraZoom;
+            camera.position.z = (houseVec[0]+hereVec[0]) * 0.5 * cameraZoom;
             
             orbControls.autoRotate = false;
+            
         }
+        else {
+            displayError("Error: angle >90 degrees.");
+        }
+        Globe.pointsData(gData);
     });
 
     // Submit if user presses enter when in text inputs.
@@ -114,21 +164,19 @@ $(document).ready(function () {
         });
     });
 
-    var canvas_dom = document.querySelector("canvas")// make this your canvas DOM element
-    canvas_dom.addEventListener("touchstart",  function(event) {event.preventDefault()})
-    canvas_dom.addEventListener("touchmove",   function(event) {event.preventDefault()})
-    canvas_dom.addEventListener("touchend",    function(event) {event.preventDefault()})
-    canvas_dom.addEventListener("touchcancel", function(event) {event.preventDefault()})
+    // Disable touchevents for canvas
+    var canvas_dom = document.querySelector("canvas");
+    canvas_dom.addEventListener("touchstart", function(event) {event.preventDefault()});
+    canvas_dom.addEventListener("touchmove", function(event) {event.preventDefault()});
+    canvas_dom.addEventListener("touchend", function(event) {event.preventDefault()});
+    canvas_dom.addEventListener("touchcancel",function(event) {event.preventDefault()});
 
-    //-----------
-    // Globe
-    //-----------
     const N = 2;
     gData = [...Array(N).keys()].map(() => ({
       lat: 0,
       lng: 0,
       size: 0,
-      color: 'red'
+      color: "red"
     }));
 
     var lineVertShader = `
@@ -184,44 +232,42 @@ $(document).ready(function () {
     var clock = new THREE.Clock();
     var timeLine = 0;
 
-    Globe = new ThreeGlobe()
-        .globeImageUrl('//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg')
-        .bumpImageUrl('//unpkg.com/three-globe@2.24.4/example/img/earth-topology.png')
-        .pointAltitude('size')
-        .pointRadius(0.7)
-        .pointColor('color')
-        .pointsTransitionDuration(0)
-
-    // custom globe material
-    const globeMaterial = Globe.globeMaterial();
-    globeMaterial.bumpScale = 10;
-    new THREE.TextureLoader().load('//unpkg.com/three-globe@2.24.4/example/img/earth-water.png', texture => {
-        globeMaterial.specularMap = texture;
-        globeMaterial.specular = new THREE.Color('grey');
-        globeMaterial.shininess = 15;
-    });
-    
+    // Renderer, camera, scene
     const  renderer = new THREE.WebGLRenderer({canvas: document.querySelector("canvas")});
-    
-    // There's no reason to set the aspect here because we're going
-    // to set it every frame anyway so we'll set it to 2 since 2
-    // is the the aspect for the canvas default size (300w/150h = 2)
     const  camera = new THREE.PerspectiveCamera(70, 2, 1, 10000);
     camera.position.z = 400;
-    
     const scene = new THREE.Scene();
 
+    // Lights
     scene.add(new THREE.AmbientLight(0xffeeee, 1.15));
-
-    const light1 = new THREE.PointLight(0xffdddd, .2, 0);
+    const light1 = new THREE.PointLight(0xffdddd, .1, 0);
     light1.position.set(300, 300, 300);
     scene.add(light1);
+
+    // Globe
+    Globe = new ThreeGlobe()
+    .globeImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg")
+    // .globeImageUrl("static/images/earth.png")
+    .bumpImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-topology.png")
+    .pointAltitude("size")
+    .pointRadius(0.7)
+    .pointColor("color")
+    .pointsTransitionDuration(0)
+
+    // Specular highlights for water
+    const globeMaterial = Globe.globeMaterial();
+    globeMaterial.bumpScale = 10;
+    new THREE.TextureLoader().load("//unpkg.com/three-globe@2.24.4/example/img/earth-water.png", texture => {
+        globeMaterial.specularMap = texture;
+        globeMaterial.specular = new THREE.Color("white");
+        globeMaterial.shininess = 15;
+    });
 
     scene.add(Globe);
     
     // Add camera controls
     const orbControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbControls.minDistance = 101;
+    orbControls.minDistance = 120;
     orbControls.maxDistance = 2000;
     orbControls.rotateSpeed = 2;
     orbControls.zoomSpeed = 0.7;
@@ -236,12 +282,9 @@ $(document).ready(function () {
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
         if (canvas.width !== width ||canvas.height !== height) {
-            // you must pass false here or three.js sadly fights the browser
             renderer.setSize(width, height, false);
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
-    
-            // set render target sizes here
         }
     }
     
@@ -249,7 +292,6 @@ $(document).ready(function () {
         time *= 0.001;  // seconds
         orbControls.update();
         resizeCanvasToDisplaySize();
-        
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
         timeLine += clock.getDelta();

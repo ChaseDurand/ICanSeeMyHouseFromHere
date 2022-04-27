@@ -7,14 +7,7 @@
     <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png">
     <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src='../static/js/index.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-        var socket = io();
-        socket.on('connect', function() {
-            socket.emit('my event', {data: 'I\'m connected!'});
-        });
-    </script>
+    <script src="../static/js/index.js"></script>
     <script src="//unpkg.com/three@0.139.2"></script>
     <script src="//unpkg.com/three@0.139.2/examples/js/controls/TrackballControls.js"></script>
     <script src="//unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
@@ -33,10 +26,8 @@
                 I Can See My House From Here!
             </h1>
 
-            <!-- <label for="house">House:</label><br> -->
-            <input class="location_input" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
-            <!-- <label for="here">Here:</label><br> -->
-            <input class="location_input" autocomplete="off" type="text" id="here" name="here" value=""><br><br>
+            <input class="location_input" placeholder="House location" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
+            <input class="location_input" placeholder="Current location" autocomplete="off" type="text" id="here" name="here" value=""><br><br>
             <button class="submit" id="submit_button">Submit</button>
             <h2 id="result"></h2>
         </div>
