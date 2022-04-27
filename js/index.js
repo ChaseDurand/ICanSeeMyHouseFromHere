@@ -247,7 +247,7 @@ $(document).ready(function () {
     // Globe
     Globe = new ThreeGlobe()
     .globeImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg")
-    // .globeImageUrl("static/images/earth.png")
+    // .globeImageUrl("images/earth.png")
     .bumpImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-topology.png")
     .pointAltitude("size")
     .pointRadius(0.7)
