@@ -1,4 +1,4 @@
-# <img width='24' alt='Globe icon' src='static/images/favicon.svg'> ICanSeeMyHouseFromHere!
+# <img width='24' alt='Globe icon' src='images/favicon.svg'> ICanSeeMyHouseFromHere!
 
 A completely practical utility for calculating and visualizing the height required to achieve line of sight between two locations.
 
