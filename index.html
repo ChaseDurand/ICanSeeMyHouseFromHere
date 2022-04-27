@@ -22,14 +22,18 @@
     <div id="container">
         <canvas id="globeCanvas"></canvas>
         <div id="overlay">
-            <h1>
-                I Can See My House From Here!
-            </h1>
-
-            <input class="location_input" placeholder="House location" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
-            <input class="location_input" placeholder="Current location" autocomplete="off" type="text" id="here" name="here" value=""><br><br>
-            <button class="submit" id="submit_button">Submit</button>
-            <h2 id="result"></h2>
+            <div>
+                <h2>
+                    I Can See My House From Here!
+                </h2>
+                <input class="location_input" placeholder="House location" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
+                <input class="location_input" placeholder="Current location" autocomplete="off" type="text" id="here" name="here" value=""><br>
+                <button class="submit" id="submit_button">Submit</button>
+                <h2 id="result"></h2>
+            </div>
+            <div id="sidebarRight">
+                <button class="globeTextureButton" id="globeTextureButton">Change Globe Texture</button>
+            </div>
         </div>
     </div>
 </body>

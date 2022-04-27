@@ -27,4 +27,9 @@ canvas {
 
 #overlay {
     color: white;
+    width: 100%;
+}
+
+#sidebarRight {
+    text-align: right;
 }

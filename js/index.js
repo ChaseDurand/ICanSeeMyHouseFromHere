@@ -157,6 +157,11 @@ $(document).ready(function () {
         parseCoorPair(houseCoor, hereCoor);
     });
 
+    $(".globeTextureButton").click(async function () {
+        globeImageIndex = ++globeImageIndex % globeImages.length;
+        Globe.globeImageUrl(globeImages[globeImageIndex]);
+    });
+
     // Submit if user presses enter when in text inputs.
     document.querySelectorAll("input.location_input").forEach(item => {
         item.addEventListener("keyup", event => {
@@ -249,10 +254,13 @@ $(document).ready(function () {
     light1.position.set(300, 300, 300);
     scene.add(light1);
 
+    globeImages = ["//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg",
+        "images/earth.png"];
+    globeImageIndex = 0;
+
     // Globe
     Globe = new ThreeGlobe()
-    .globeImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg")
-    // .globeImageUrl("images/earth.png")
+    .globeImageUrl(globeImages[globeImageIndex])
     .bumpImageUrl("//unpkg.com/three-globe@2.24.4/example/img/earth-topology.png")
     .pointAltitude("size")
     .pointRadius(0.7)
