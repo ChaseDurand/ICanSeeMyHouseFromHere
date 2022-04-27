@@ -33,3 +33,30 @@ canvas {
 #sidebarRight {
     text-align: right;
 }
+
+#bannerLower {
+    display: flex;
+    height: 100%;
+}
+
+#sourceLink {
+    display:inline-block;
+    align-self: flex-end;
+}
+
+.bottom-banner-item {
+    width: 50px;
+    text-align: right;
+    margin: 0px;
+    padding: 0px;
+    color: white;
+}
+  
+.bottom-banner-container {
+    height: 50px;
+    width: 100%;
+    display: table;
+    position: fixed;
+    bottom: 0px;
+    text-align: right;
+}
