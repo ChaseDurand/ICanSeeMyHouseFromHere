@@ -38,15 +38,6 @@ $(document).ready(function () {
         return result;
     }
 
-    // Calculate magnitude of array
-    function mag(a) {
-        sum = 0
-        for (i in a) {
-            sum += (i*i);
-        }
-        return Math.sqrt(sum);
-    }
-
     // Convert lat, long to x, y, z vector
     function coorToVec(coors) {
         lat = coors[0];
@@ -55,7 +46,6 @@ $(document).ready(function () {
             Math.cos(toRadians(lat)) * Math.sin(toRadians(lng)),
             Math.sin(toRadians(lat))]
     }
-    
 
     // Given two vectors, return the angle between them.
     // Return angle in radians.
@@ -76,18 +66,9 @@ $(document).ready(function () {
         return Math.max(height, 0);
     }
 
-    // Handler for submit button
-    // Send inputs to backend
-    $(".submit").click(async function () {
-        house = document.getElementById("house").value;
-        here = document.getElementById("here").value;
-
-        houseCoor = await getLocation(house)
-        hereCoor = await getLocation(here)
-
-        // Coordinates to vector
-        houseVec = coorToVec(houseCoor);
-        hereVec = coorToVec(hereCoor);
+    function parseCoorPair(houseCr, hereCr) {
+        houseVec = coorToVec(houseCr);
+        hereVec = coorToVec(hereCr);
 
         // Determine if angle is < 90
         angle = vecToAngle(houseVec, hereVec);
@@ -115,7 +96,15 @@ $(document).ready(function () {
             gData[0].size = height / rEarth;
 
             // Update on screen text
-            document.getElementById("result").innerHTML = height + "m";
+            if(height > 100) {
+                // Round to one decimal
+                height = Math.round(height * 10) / 10;
+            }
+            else{
+                // Round to int
+                height = Math.round(height);
+            }
+            document.getElementById("result").innerHTML = height.toLocaleString() + "m";
 
             // Create dashed LOS line
             rEarthLine = 100;
@@ -153,6 +142,19 @@ $(document).ready(function () {
             displayError("Error: angle >90 degrees.");
         }
         Globe.pointsData(gData);
+        return;
+    }
+
+    // Handler for submit button
+    // Send inputs to backend
+    $(".submit").click(async function () {
+        house = document.getElementById("house").value;
+        here = document.getElementById("here").value;
+
+        houseCoor = await getLocation(house);
+        hereCoor = await getLocation(here);
+
+        parseCoorPair(houseCoor, hereCoor);
     });
 
     // Submit if user presses enter when in text inputs.
