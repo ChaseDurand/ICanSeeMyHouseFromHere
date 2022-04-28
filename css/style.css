@@ -14,7 +14,7 @@ body {
 }
 
 .title {
-    font-size: 28px;
+    font-size: 24px;
     text-align: center;
 }
 
@@ -126,7 +126,7 @@ canvas {
 }
 
 #result {
-    font-size: 24px;
+    font-size: 20px;
     text-align: center;
 }
 
