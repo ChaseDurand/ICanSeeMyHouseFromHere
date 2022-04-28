@@ -179,16 +179,24 @@ $(document).ready(function () {
         Globe.globeImageUrl(globeImages[globeImageIndex]);
     });
 
-    // Submit if user presses enter when in text inputs.
-    document.querySelectorAll("input.location_input").forEach(item => {
-        item.addEventListener("keyup", event => {
+        // Goto next field if user pressed enter in house input.
+        document.getElementById("house").addEventListener("keyup", event => {
             if (event.key === "Enter") {
                 // Cancel the default action, if needed
                 event.preventDefault();
-                // Trigger the submit button with a click
-                document.getElementById("submit_button").click();
+                // Focus on next input
+                document.getElementById("here").focus();
             }
         });
+
+    // Submit if user presses enter when in here input.
+    document.getElementById("here").addEventListener("keyup", event => {
+        if (event.key === "Enter") {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Trigger the submit button with a click
+            document.getElementById("submit_button").click();
+        }
     });
 
     // Disable touchevents for canvas

@@ -16,8 +16,6 @@ body {
 .title {
     font-size: 28px;
     text-align: center;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;
 }
 
 .top-banner {
@@ -130,13 +128,9 @@ canvas {
 #result {
     font-size: 24px;
     text-align: center;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;
 }
 
 #fact {
     font-size: 18px;
     text-align: center;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;
 }
