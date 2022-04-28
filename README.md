@@ -1,6 +1,6 @@
 # <img width='24' alt='Globe icon' src='images/favicon.svg'> ICanSeeMyHouseFromHere!
 
-A completely practical utility for calculating and visualizing the height required to achieve line of sight between two locations.
+A completely practical utility for calculating and visualizing the height required to achieve line of sight between two locations. [Try it online](https://chasedurand.github.io/ICanSeeMyHouseFromHere/)!
 
 
 <p align='center'>
