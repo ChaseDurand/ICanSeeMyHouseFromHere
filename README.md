@@ -2,6 +2,11 @@
 
 A completely practical utility for calculating and visualizing the height required to achieve line of sight between two locations.
 
+
+<p align='center'>
+<img width='100%' alt='GUI screenshot' src='images/example.png'>
+</p>
+
 ## ~~Limitations~~ Use Cases
  * You and your house are on perfectly spherical and terrain-free Earth.
  * Your infinite-vision eyeballs are 1.6m above your feet.
