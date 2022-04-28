@@ -60,3 +60,13 @@ canvas {
     bottom: 0px;
     text-align: right;
 }
+
+#loadingGif {
+    height: 22px;
+    vertical-align: bottom;
+    display: none;
+}
+
+.location_input{
+    margin: 2px;
+}

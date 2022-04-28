@@ -70,7 +70,7 @@ $(document).ready(function () {
         houseVec = coorToVec(houseCr);
         hereVec = coorToVec(hereCr);
 
-        // Determine if angle is < 90
+        
         angle = vecToAngle(houseVec, hereVec);
 
         // If LOS line exists, remove it
@@ -88,6 +88,7 @@ $(document).ready(function () {
         gData[1].size = 0;
         gData[1].color = "yellow";
 
+        // Determine if angle is < 90
         if(angle < (Math.PI / 2)) {
             // Angle to height
             height = angleToHeight(angle);
@@ -148,6 +149,14 @@ $(document).ready(function () {
     // Handler for submit button
     // Send inputs to backend
     $(".submit").click(async function () {
+        // If loading gif is present, do nothing (currently processing request).
+        if (document.getElementById("loadingGif").style.display == "inline") {
+            return
+        }
+        // Set loading gif
+        document.getElementById("loadingGif").style.display = "inline";
+
+
         house = document.getElementById("house").value;
         here = document.getElementById("here").value;
 
@@ -155,6 +164,9 @@ $(document).ready(function () {
         hereCoor = await getLocation(here);
 
         parseCoorPair(houseCoor, hereCoor);
+
+        // Remove loading gif
+        document.getElementById("loadingGif").style.display = "none";
     });
 
     $(".globeTextureButton").click(async function () {
