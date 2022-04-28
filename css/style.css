@@ -9,6 +9,42 @@
 
 body {
     margin: 0;
+    font-family: "Roboto", sans-serif;
+    color: rgb(238, 238, 238);
+}
+
+.title {
+    font-size: 28px;
+    text-align: center;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.top-banner {
+    width: 100%;
+    height: 60px;
+    margin: 0px;
+    padding: 0px;
+    display: table-cell;
+}
+  
+.top-banner-parent {
+    height: 65px;
+    width: 100%;
+    font-size: 13px;
+    margin-top: 4px;
+    display: table;
+}
+  
+.left {
+    margin-left: 4px;
+    float: left;
+}
+  
+.right {
+    margin-right: 4px;
+    text-align: center;
+    float: right;
 }
 
 canvas {
@@ -26,12 +62,8 @@ canvas {
 }
 
 #overlay {
-    color: white;
+    /* color: white; */
     width: 100%;
-}
-
-#sidebarRight {
-    text-align: right;
 }
 
 #bannerLower {
@@ -44,10 +76,13 @@ canvas {
     align-self: flex-end;
 }
 
+
+
 .bottom-banner-item {
     width: 50px;
-    text-align: right;
+    text-align: center;
     margin: 0px;
+    margin-right: 20px;
     padding: 0px;
     color: white;
 }
@@ -69,4 +104,39 @@ canvas {
 
 .location_input{
     margin: 2px;
+}
+
+.globeTextureButton:hover{
+    cursor: pointer;
+}
+
+.location_input {
+    margin: 2px;
+}
+
+.submit {
+    transition-duration: 0.1s;
+    background-color: rgba(255, 255, 255, 0);
+    color: rgb(255, 255, 255);
+    border: 2px solid #797979;
+    margin-left: 2px;
+}
+
+.submit:hover{
+    cursor: pointer;
+    background-color: #797979;
+}
+
+#result {
+    font-size: 24px;
+    text-align: center;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+#fact {
+    font-size: 18px;
+    text-align: center;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
 }

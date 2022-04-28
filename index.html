@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="js/index.js"></script>
+    <script src="js/funFact.js"></script>
     <script src="//unpkg.com/three@0.139.2"></script>
     <script src="//unpkg.com/three@0.139.2/examples/js/controls/TrackballControls.js"></script>
     <script src="//unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
@@ -22,19 +23,31 @@
     <div id="container">
         <canvas id="globeCanvas"></canvas>
         <div id="overlay">
-            <div>
-                <h2>
+            <div class="top-banner-parent">
+                <h1 class="title">
                     I Can See My House From Here!
-                </h2>
-                <input class="location_input" placeholder="House location" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
-                <input class="location_input" placeholder="Current location" autocomplete="off" type="text" id="here" name="here" value=""><br>
-                <button class="submit" id="submit_button">Submit</button>
-                <img id="loadingGif" alt="Loading GIF" src="images/loading.gif" height="20px">
-                <h2 id="result"></h2>
+                </h1>
+                <div class="top-banner, left">
+
+                    <input class="location_input" placeholder="House location" autocomplete="off" type="text" id="house" name="house" value="" autofocus><br>
+                    <input class="location_input" placeholder="Current location" autocomplete="off" type="text" id="here" name="here" value=""><br>
+                    <button class="submit" id="submit_button">Submit</button>
+                    <img id="loadingGif" alt="Loading GIF" src="images/loading.gif" height="20px">
+                    
+                </div>
+                <div class="top-banner, right">
+                    <a>
+                        <img src="images/favicon.svg" height="50px" class="globeTextureButton" id="globeTextureButton">
+                    </a>
+                    <br>
+                    <a class="globeTextureButton">
+                        Swap Texture
+                    </a>
+                </div>
+                
             </div>
-            <div id="sidebarRight">
-                <button class="globeTextureButton" id="globeTextureButton">Change Globe Texture</button>
-            </div>
+            <h2 id="result"></h2>
+            <h3 id="fact"></h3>
 
             <div class="bottom-banner-container">
                 <a class="bottom-banner-item" href="https://github.com/ChaseDurand/ICanSeeMyHouseFromHere">

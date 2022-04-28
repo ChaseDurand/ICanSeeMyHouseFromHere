@@ -78,6 +78,9 @@ $(document).ready(function () {
             scene.remove(scene.children[scene.children.length - 1]);
         }
 
+        // Clear current fact
+        document.getElementById("fact").innerHTML = "";
+
         // Update here and house points
         gData[0].lat = hereCoor[0];
         gData[0].lng = hereCoor[1];
@@ -97,7 +100,7 @@ $(document).ready(function () {
             gData[0].size = height / rEarth;
 
             // Update on screen text
-            if(height > 100) {
+            if(height < 100) {
                 // Round to one decimal
                 height = Math.round(height * 10) / 10;
             }
@@ -106,6 +109,8 @@ $(document).ready(function () {
                 height = Math.round(height);
             }
             document.getElementById("result").innerHTML = height.toLocaleString() + "m";
+
+            document.getElementById("fact").innerHTML = getFact(height);
 
             // Create dashed LOS line
             rEarthLine = 100;
