@@ -3,6 +3,10 @@ function getRandomInt(max) {
 }
 
 function getFact(h) {
+    if (h==0) {
+        return "";
+    }
+
     // If height is greater than min height reference, use references:
     if (h >= heightReferences[0][0]) {
         i = 0

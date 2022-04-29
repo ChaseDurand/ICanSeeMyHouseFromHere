@@ -20,7 +20,7 @@ $(document).ready(function () {
         } catch(err) {
             displayError("Error getting location: " + loc);
             console.log(err);
-            return [0, 0];
+            return ["error", "error"];
         }
     }
 
@@ -67,19 +67,11 @@ $(document).ready(function () {
     }
 
     function parseCoorPair(houseCr, hereCr) {
+
         houseVec = coorToVec(houseCr);
         hereVec = coorToVec(hereCr);
 
-        
         angle = vecToAngle(houseVec, hereVec);
-
-        // If LOS line exists, remove it
-        if (scene.children[scene.children.length - 1].type == "LineSegments") {
-            scene.remove(scene.children[scene.children.length - 1]);
-        }
-
-        // Clear current fact
-        document.getElementById("fact").innerHTML = "";
 
         // Update here and house points
         gData[0].lat = hereCoor[0];
@@ -110,6 +102,7 @@ $(document).ready(function () {
             }
             document.getElementById("result").innerHTML = height.toLocaleString() + "m";
 
+            // Add fun fact
             document.getElementById("fact").innerHTML = getFact(height);
 
             // Create dashed LOS line
@@ -145,7 +138,7 @@ $(document).ready(function () {
             
         }
         else {
-            displayError("Error: angle >90 degrees.");
+            displayError("No possible height: angle >90 degrees!");
         }
         Globe.pointsData(gData);
         return;
@@ -168,7 +161,17 @@ $(document).ready(function () {
         houseCoor = await getLocation(house);
         hereCoor = await getLocation(here);
 
-        parseCoorPair(houseCoor, hereCoor);
+        // If LOS line exists, remove it
+        if (scene.children[scene.children.length - 1].type == "LineSegments") {
+            scene.remove(scene.children[scene.children.length - 1]);
+        }
+
+        // Clear current fact
+        document.getElementById("fact").innerHTML = "";
+
+        if ((houseCoor[0] != "error") && (hereCoor[0] != "error")) {
+            parseCoorPair(houseCoor, hereCoor);
+        }
 
         // Remove loading gif
         document.getElementById("loadingGif").style.display = "none";
@@ -279,8 +282,8 @@ $(document).ready(function () {
     light1.position.set(300, 300, 300);
     scene.add(light1);
 
-    globeImages = ["//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg",
-        "images/earth.png"];
+    globeImages = ["images/earth.png",
+        "//unpkg.com/three-globe@2.24.4/example/img/earth-blue-marble.jpg"];
     globeImageIndex = 0;
 
     // Globe
