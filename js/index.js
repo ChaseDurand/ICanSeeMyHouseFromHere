@@ -1,4 +1,4 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function() {
     rEarth = 6371000 // Radius of the Earth in meters
 
     function displayError(err) {
@@ -146,14 +146,13 @@ $(document).ready(function () {
 
     // Handler for submit button
     // Send inputs to backend
-    $(".submit").click(async function () {
+    document.querySelector(".submit").addEventListener("click",async function () {
         // If loading gif is present, do nothing (currently processing request).
         if (document.getElementById("loadingGif").style.display == "inline") {
             return
         }
         // Set loading gif
         document.getElementById("loadingGif").style.display = "inline";
-
 
         house = document.getElementById("house").value;
         here = document.getElementById("here").value;
@@ -177,20 +176,20 @@ $(document).ready(function () {
         document.getElementById("loadingGif").style.display = "none";
     });
 
-    $(".globeTextureButton").click(async function () {
+    document.querySelector(".globeTextureButton").addEventListener("click", async function () {
         globeImageIndex = ++globeImageIndex % globeImages.length;
         Globe.globeImageUrl(globeImages[globeImageIndex]);
     });
 
-        // Goto next field if user pressed enter in house input.
-        document.getElementById("house").addEventListener("keyup", event => {
-            if (event.key === "Enter") {
-                // Cancel the default action, if needed
-                event.preventDefault();
-                // Focus on next input
-                document.getElementById("here").focus();
-            }
-        });
+    // Goto next field if user pressed enter in house input.
+    document.getElementById("house").addEventListener("keyup", event => {
+        if (event.key === "Enter") {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Focus on next input
+            document.getElementById("here").focus();
+        }
+    });
 
     // Submit if user presses enter when in here input.
     document.getElementById("here").addEventListener("keyup", event => {
